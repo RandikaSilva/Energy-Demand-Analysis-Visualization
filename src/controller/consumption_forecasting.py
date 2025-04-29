@@ -45,16 +45,20 @@ def forecast_energy_consumption(country, target_column, years_to_forecast=8):
     country_data = data_selected[data_selected['country'] == country]
     country_data = country_data.set_index('year')
     series = country_data[target_column]
-    
-    # Data cleaning
-    # Remove duplicates and NaN values
+    exog_vars = country_data[['gdp', 'population']].fillna(method='ffill').fillna(method='bfill')
     series = data_cleaning_func(series)
+    exog_vars = exog_vars.loc[series.index]
+    if not series.index.equals(exog_vars.index):
+        raise ValueError("The indices for endog (series) and exog (exog_vars) are not aligned.")
 
-    model = SARIMAX(series, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
+    model = SARIMAX(series, exog=exog_vars, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
     model_fit = model.fit(disp=False)
 
-    forecast = model_fit.forecast(steps=years_to_forecast)
-    forecast_years = np.arange(series.index[-1] + 1, series.index[-1] + years_to_forecast + 1)
+    last_exog = exog_vars.iloc[-1]
+    future_exog = pd.DataFrame([last_exog] * years_to_forecast, columns=exog_vars.columns)
+    
+    forecast = model_fit.forecast(steps=years_to_forecast, exog=future_exog)
+    forecast_years = np.arange(country_data.index[-1] + 1, country_data.index[-1] + years_to_forecast + 1)
      
     forecast_data = pd.DataFrame({
         'Year': forecast_years,
@@ -87,7 +91,6 @@ def history_data_energy_consumption(country, target_column, years_to_forecast=8)
     result = pd.concat([historical_data]).reset_index(drop=True)
     return result
 
-# TODO : Needs tom implement country list of electricity consumption forecasting table
 def projected_energy_consumption(countries, year = 8):
     forecast_summary = []
     
@@ -103,7 +106,7 @@ def projected_energy_consumption(countries, year = 8):
         renewables_forecast = forecast_results[country]['renewable_energy_forecast']
         forecast_summary.append({
             'Country': country,
-            '2030 Total Energy (TWh)': total_forecast.iloc[-1]['Forecast_Consumption'],
-            '2030 Renewables (TWh)': renewables_forecast.iloc[-1]['Forecast_Consumption'],
-            'Renewables Share (%)': ((renewables_forecast.iloc[-1]['Forecast_Consumption'] / total_forecast.iloc[-1]['Forecast_Consumption']) * 100)})
+            '2030 Total Energy (TWh)': total_forecast.iloc[-1].item(),
+            '2030 Renewables (TWh)': renewables_forecast.iloc[-1].item(),
+            'Renewables Share (%)': ((renewables_forecast.iloc[-1] / total_forecast.iloc[-1]) * 100).item()})
     return pd.DataFrame(forecast_summary)
