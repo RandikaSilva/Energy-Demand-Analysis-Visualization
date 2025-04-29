@@ -29,12 +29,14 @@ def get_history():
 
 @app.route('/projected_energy_consumption', methods=['GET'])
 def get_projected_energy_consumption():
-    country = request.args.get('country')
+    countries = request.args.get('country')
+    if countries:
+        countries = [country.strip() for country in countries.split(',')]
     
-    if country is None:
+    if countries is None:
         return jsonify({"error": "Please provide 'country' and 'target_column' as query parameters"}), 400
 
-    forecast_df = projected_energy_consumption(country, year=8)
+    forecast_df = projected_energy_consumption(countries, year=8)
     return jsonify(forecast_df.to_dict(orient='records'))
 
 
@@ -87,7 +89,7 @@ def history_data_energy_consumption(country, target_column, years_to_forecast=8)
 
 # TODO : Needs tom implement country list of electricity consumption forecasting table
 def projected_energy_consumption(countries, year = 8):
-    forecast_summary = pd.DataFrame()
+    forecast_summary = []
     
     for country in countries:
         forecast_results = {}
@@ -99,10 +101,9 @@ def projected_energy_consumption(countries, year = 8):
                 }
         total_forecast = forecast_results[country]['total_energy_forecast']
         renewables_forecast = forecast_results[country]['renewable_energy_forecast']
-        forecast_summary = pd.append({
+        forecast_summary.append({
             'Country': country,
-            '2030 Total Energy (TWh)': total_forecast.iloc[-1],
-            '2030 Renewables (TWh)': renewables_forecast.iloc[-1],
-            'Renewables Share (%)': (renewables_forecast.iloc[-1] / total_forecast.iloc[-1]) * 100})
-        print(forecast_summary)
-    return forecast_summary
+            '2030 Total Energy (TWh)': total_forecast.iloc[-1]['Forecast_Consumption'],
+            '2030 Renewables (TWh)': renewables_forecast.iloc[-1]['Forecast_Consumption'],
+            'Renewables Share (%)': ((renewables_forecast.iloc[-1]['Forecast_Consumption'] / total_forecast.iloc[-1]['Forecast_Consumption']) * 100)})
+    return pd.DataFrame(forecast_summary)
