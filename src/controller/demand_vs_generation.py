@@ -20,11 +20,11 @@ def demand_vs_forecasting(countries):
     data_selected = data_selected[columns_needed]
     
     data_selected = data_cleaning_func(data_selected)
-    print(countries)
+
     result = []
     for country in countries:
         subset = data_selected[data_selected['country'] == country]
-        subset = subset[subset['electricity_demand'] > 0]  # Filter out zero or negative demand
+        subset = subset[subset['electricity_demand'] > 0]
         efficiency = subset['electricity_generation'] / subset['electricity_demand']
         for year, eff in zip(subset['year'], efficiency):
             result.append({'country': country, 'year': year, 'efficiency': eff})

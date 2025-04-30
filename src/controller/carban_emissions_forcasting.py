@@ -25,16 +25,21 @@ def forecast_carban_emissions_forcasting(country, years_to_forecast=8):
     country_data = country_data.set_index('year')
     series = country_data['greenhouse_gas_emissions']
     
+    series = series.reindex(np.arange(2000, 2023))
+    series = series.interpolate(method='linear')
+    series = series.fillna(method='bfill').fillna(method='ffill')
+
     # Data cleaning
     # Remove duplicates and NaN values
-    series = data_cleaning_func(series)
+    series = series[series.index >= 2000]
+    series = new_func(series)
 
     model = SARIMAX(series, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
     model_fit = model.fit(disp=False)
     forecast = model_fit.forecast(steps=years_to_forecast)
 
     forecasting_years_range = np.arange(country_data.index[-1] + 1, country_data.index[-1] + years_to_forecast + 1)
-     
+        
     forecast_data = pd.DataFrame({
         'Year': forecasting_years_range,
         'Carban Emissions Forecasting': forecast.values
@@ -42,15 +47,20 @@ def forecast_carban_emissions_forcasting(country, years_to_forecast=8):
     
     return forecast_data.reset_index(drop=True)
 
+def new_func(series):
+    series = data_cleaning_func(series)
+    return series
+
 def history_carban_emissions_forcasting(country, years_to_forecast=8):
     data_selected = get_data()
     country_data = data_selected[data_selected['country'] == country]
     country_data = country_data.set_index('year')
     series = country_data['greenhouse_gas_emissions']
 
-    # Data cleaning
-    # Remove duplicates and NaN values
-    series = data_cleaning_func(series)
+    series = series[series.index >= 2000]
+    series = series.reindex(np.arange(2000, 2023))
+    series = series.interpolate(method='linear')
+    series = series.fillna(method='bfill').fillna(method='ffill')
 
     historical_data = pd.DataFrame({
         'Year': series.index,
