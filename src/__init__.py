@@ -2,4 +2,4 @@ from flask import Flask
 
 app = Flask(__name__)
 
-from src.controller import consumption_forecasting, carban_emissions_forcasting, demand_vs_generation
+from src.controller import consumption_forecasting, carban_emissions_forcasting, demand_vs_generation, renewable_energy_growth_tracking
