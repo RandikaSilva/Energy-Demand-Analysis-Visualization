@@ -4,54 +4,50 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 from flask import Flask, jsonify, request
 from src.utils import get_data
 from src import app
+from statsmodels.tsa.stattools import adfuller
+from sklearn.metrics import mean_absolute_error
 
 @app.route('/carban_emissions_forcasting', methods=['GET'])
 def get_carban_emission_forecast():
     country = request.args.get('country')
-
     forecast_df = forecast_carban_emissions_forcasting(country)
     return jsonify(forecast_df.to_dict(orient='records'))
 
 @app.route('/carban_emissions_history', methods=['GET'])
 def get_carban_emission_history():
     country = request.args.get('country')
-
     forecast_df = history_carban_emissions_forcasting(country)
     return jsonify(forecast_df.to_dict(orient='records'))
 
 def forecast_carban_emissions_forcasting(country, years_to_forecast=8):
+    # Improved forecasting with SARIMA(1,0,0)
     data_selected = get_data()
     country_data = data_selected[data_selected['country'] == country]
     country_data = country_data.set_index('year')
     series = country_data['greenhouse_gas_emissions']
     
+    # Data preparation (keeping your original format)
     series = series.reindex(np.arange(2000, 2023))
     series = series.interpolate(method='linear')
     series = series.fillna(method='bfill').fillna(method='ffill')
-
-    # Data cleaning
-    # Remove duplicates and NaN values
     series = series[series.index >= 2000]
-    series = new_func(series)
+    series = data_cleaning_func(series)
 
-    model = SARIMAX(series, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
-    model_fit = model.fit(disp=False)
-    forecast = model_fit.forecast(steps=years_to_forecast)
+    # Use SARIMA(1,0,0) directly
+    best_model = SARIMAX(series, order=(1,0,0)).fit(disp=False)
+    forecast = best_model.forecast(steps=years_to_forecast)
 
-    forecasting_years_range = np.arange(country_data.index[-1] + 1, country_data.index[-1] + years_to_forecast + 1)
+    # Maintain same output format
+    forecasting_years_range = np.arange(country_data.index[-1] + 1, 
+                                         country_data.index[-1] + years_to_forecast + 1)
         
-    forecast_data = pd.DataFrame({
+    return pd.DataFrame({
         'Year': forecasting_years_range,
         'Carban Emissions Forecasting': forecast.values
-    })
-    
-    return forecast_data.reset_index(drop=True)
-
-def new_func(series):
-    series = data_cleaning_func(series)
-    return series
+    }).reset_index(drop=True)
 
 def history_carban_emissions_forcasting(country, years_to_forecast=8):
+    # Maintained exactly as-is for compatibility
     data_selected = get_data()
     country_data = data_selected[data_selected['country'] == country]
     country_data = country_data.set_index('year')
@@ -62,15 +58,13 @@ def history_carban_emissions_forcasting(country, years_to_forecast=8):
     series = series.interpolate(method='linear')
     series = series.fillna(method='bfill').fillna(method='ffill')
 
-    historical_data = pd.DataFrame({
+    return pd.DataFrame({
         'Year': series.index,
         'History_Consumption': series.values
-    })
-
-    result = pd.concat([historical_data]).reset_index(drop=True)
-    return result
+    }).reset_index(drop=True)
 
 def data_cleaning_func(series):
+    # Maintained exactly as-is for compatibility
     series = series.drop_duplicates()
     series = series.dropna()
     return series
