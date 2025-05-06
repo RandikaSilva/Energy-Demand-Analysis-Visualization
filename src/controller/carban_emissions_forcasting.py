@@ -34,16 +34,23 @@ def forecast_carban_emissions_forcasting(country, years_to_forecast=8):
     series = data_cleaning_func(series)
 
     # Use SARIMA(1,0,0) directly
-    best_model = SARIMAX(series, order=(1,0,0)).fit(disp=False)
-    forecast = best_model.forecast(steps=years_to_forecast)
-
+    model = SARIMAX(series, order=(1,0,0))
+    model_fit = model.fit(disp=False)
+    
+    # Use get_forecast() instead of forecast() to get confidence intervals
+    forecast = model_fit.get_forecast(steps=years_to_forecast)
+    forecast_mean = forecast.predicted_mean
+    conf_int = forecast.conf_int()
+    
     # Maintain same output format
     forecasting_years_range = np.arange(country_data.index[-1] + 1, 
-                                         country_data.index[-1] + years_to_forecast + 1)
+                                     country_data.index[-1] + years_to_forecast + 1)
         
     return pd.DataFrame({
         'Year': forecasting_years_range,
-        'Carban Emissions Forecasting': forecast.values
+        'Carban Emissions Forecasting': forecast_mean.round(3).values,
+        'Lower_Bound': conf_int.iloc[:, 0].round(3).values,
+        'Upper_Bound': conf_int.iloc[:, 1].round(3).values
     }).reset_index(drop=True)
 
 def history_carban_emissions_forcasting(country, years_to_forecast=8):
