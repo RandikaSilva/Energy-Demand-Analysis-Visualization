@@ -33,8 +33,7 @@ def forecast_carban_emissions_forcasting(country, years_to_forecast=8):
     series = series[series.index >= 2000]
     series = data_cleaning_func(series)
 
-    # Use SARIMA(1,0,0) directly
-    model = SARIMAX(series, order=(1,0,0))
+    model = SARIMAX(series, order=(1,1,1))
     model_fit = model.fit(disp=False)
     
     # Use get_forecast() instead of forecast() to get confidence intervals
