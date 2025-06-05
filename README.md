@@ -17,6 +17,29 @@ The solution is built using:
 
 ---
 
+## 📈 Power BI Dashboards
+
+Interactive dashboards were built to display:
+- Historical and forecasted carbon emissions
+- Renewable energy contributions over time
+- Demand vs. generation efficiency analysis
+
+Power BI is connected to the backend via **Flask API** for dynamic updates.
+
+### 🔹 Carbon Emissions Forecast
+![Carbon Emissions Forecast](images/carbon_forecast.png)
+
+### 🔹 Primary Energy Consumption Forecast
+![Energy Consumption Forecast](images/energy_consumption.png)
+
+### 🔹 Renewable Energy Share
+![Renewable Energy Share](images/renewable_share.png)
+
+### 🔹 Demand vs Generation Efficiency
+![Demand vs Generation](images/demand_vs_generation.png)
+
+---
+
 ## 📂 Repository Structure
 
 ```bash
