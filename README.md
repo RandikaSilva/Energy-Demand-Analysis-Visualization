@@ -27,7 +27,7 @@ Interactive dashboards were built to display:
 Power BI is connected to the backend via **Flask API** for dynamic updates.
 
 ### 🔹 Carbon Emissions Forecast
-![Carbon Emissions Forecast](images/carbon_forecast.png)
+![Carbon Emissions Forecast](images//Carbon-Emmission-Forecasting.png)
 
 ### 🔹 Primary Energy Consumption Forecast
 ![Energy Consumption Forecast](images/energy_consumption.png)
