@@ -30,13 +30,13 @@ Power BI is connected to the backend via **Flask API** for dynamic updates.
 ![Carbon Emissions Forecast](images//Carbon-Emmission-Forecasting.png)
 
 ### 🔹 Primary Energy Consumption Forecast
-![Energy Consumption Forecast](images/energy_consumption.png)
+![Energy Consumption Forecast](images/Energy-Forcasting.png)
 
 ### 🔹 Renewable Energy Share
-![Renewable Energy Share](images/renewable_share.png)
+![Renewable Energy Share](images/RenewableShare.png)
 
 ### 🔹 Demand vs Generation Efficiency
-![Demand vs Generation](images/demand_vs_generation.png)
+![Demand vs Generation](images/DemandvsGeneration.png)
 
 ---
 
